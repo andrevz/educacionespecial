@@ -1,0 +1,1159 @@
+<html>
+<head>
+<title>Web Hosting Control Panel - AWARDSPACE.COM - Free Web Hosting Provider</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link rel="stylesheet" href="images/styles.css" type="text/css">
+</head>
+<body onLoad="get_random_tip()"><script language="Javascript" type="text/javascript">
+
+    function catchall_email(status)
+    {
+        if(status == true)
+        {
+            // Catch-all checkbox is checked
+            document.add_email.email_name.value = "catchall";
+            document.add_email.email_name.disabled = true;
+        }
+        else
+        {
+            // Catch-all checkbox is unchecked
+            document.add_email.email_name.value = "";
+            document.add_email.email_name.disabled = false;
+        }
+    }
+    
+    function filter_all(status)
+    {
+        if(status == true)
+        {
+            // The "apply to all e-mails" checkbox is checked
+            document.add_email_filter.alias_name.disabled = true;
+        }
+        else
+        {
+            // The "apply to all e-mails" checkbox is unchecked
+            document.add_email_filter.alias_name.disabled = false;
+        }
+    }
+    
+    function manage_files(status, file, selected_files)
+    {
+        if(status == false)
+        {
+            // File checkbox is unchecked
+            
+            // Empty the file list
+            document.file_system_management_top.manage_files.value = "";
+            
+            // Split the file list by the | (pipe) symbol
+            var files = new Array();
+            files = selected_files.split("|");
+            for(var i=0; i<files.length; i++)
+            {
+                // Update the file list
+                if(files[i] != file)
+                    document.file_system_management_top.manage_files.value += files[i] + "|";
+            }
+            document.file_system_management_top.manage_files.value = document.file_system_management_top.manage_files.value.substr(0, document.file_system_management_top.manage_files.value.length-1);
+        }
+        else
+        {
+            // File checkbox is checked
+            // Add the name of the file to be deleted to the file list
+            if(selected_files.length > 0)
+                document.file_system_management_top.manage_files.value = selected_files + "|" + file;
+            else
+                document.file_system_management_top.manage_files.value = selected_files + file;
+        }
+        document.file_system_management_bottom.manage_files.value = document.file_system_management_top.manage_files.value;
+    }
+
+    function manage_folders(status, dir, selected_folders)
+    {
+        if(status == false)
+        {
+            // File checkbox is unchecked
+            
+            // Empty the file list
+            document.file_system_management_top.manage_folders.value = "";
+            
+            // Split the file list by the | (pipe) symbol
+            var dirs = new Array();
+            dirs = selected_folders.split("|");
+            for(var i=0; i<dirs.length; i++)
+            {
+                // Update the file list
+                if(dirs[i] != dir)
+                    document.file_system_management_top.manage_folders.value += dirs[i] + "|";
+            }
+            document.file_system_management_top.manage_folders.value = document.file_system_management_top.manage_folders.value.substr(0, document.file_system_management_top.manage_folders.value.length-1);
+        }
+        else
+        {
+            // File checkbox is checked
+            // Add the name of the file to be deleted to the file list
+            if(selected_folders.length > 0)
+                document.file_system_management_top.manage_folders.value = selected_folders + "|" + dir;
+            else
+                document.file_system_management_top.manage_folders.value = selected_folders + dir;
+        }
+        document.file_system_management_bottom.manage_folders.value = document.file_system_management_top.manage_folders.value;
+    }
+
+    function start_loading(message){
+	
+	document.getElementById('loading_div_info').innerHTML = '<b>' + message + '</b>';
+	show_layer_ext('status_div', 'hidden', 'none');
+	show_layer_ext('loading_div', 'visible', 'inline');
+	document.getElementById('loader').click();
+
+    }
+
+    function confirm_delete(selected_files, selected_folders)
+    {
+        if(selected_files != "" || selected_folders != ""){
+            if (confirm('Are you sure you want to delete the selected files and folders?')){
+		start_loading('Deleting selected files and folders. Please wait ...');
+		return true;
+	    }
+
+	    return false;
+	}
+        else
+        {
+            alert('No files and/or folders are selected!')
+            return false;
+        }
+    }
+
+    function confirm_chmod(selected_files, selected_folders)
+    {
+        if(selected_files != "" || selected_folders != ""){
+            if (confirm('Are you sure you want to change the permissions of the selected files and folders?')){
+		start_loading('Changing permissions of selected files and folders. Please wait ...');
+		return true;
+	    }
+
+	    return false;
+	}
+        else
+        {
+            alert('No files and/or folders are selected!')
+            return false;
+        }
+    }
+
+    function confirm_extract(selected_files, selected_folders)
+    {
+	if (selected_files != ""){
+	    if (confirm('Are you sure you wish to extract the selected archives?')){
+		start_loading('Extracting archive(s). Please wait ...'); 
+		return true; 
+	    } 
+	    
+	    return false;
+	}
+	else {
+	    alert('You have not selected any archives!');
+	    return false;
+	}
+    }
+
+    function set_new_path(path, selected_files, selected_folders)
+    {
+        if(selected_files != "" || selected_folders != "")
+        {
+            var new_path = prompt('Please enter new path to copy your files and folders to:', path);
+            if(new_path)
+            {
+                document.file_system_management_top.new_path.value = new_path;
+                document.file_system_management_bottom.new_path.value = new_path;
+                return true;
+            }
+            else
+            {
+                alert('You have provided empty path!');
+                return false;
+            }
+        }
+        else
+        {
+            alert('No files and/or folders are selected!')
+            return false;
+        }
+    }
+    
+    function set_new_name(selected_file, selected_folder)
+    {
+        var files = new Array();
+        var folders = new Array();
+        
+        // Split the file and folder lists by the | (pipe) symbol
+        files = selected_file.split("|");
+        folders = selected_folder.split("|");
+        
+        if((files[0] != "" && files.length == 1) && folders[0] == "")
+        {
+            var new_file = prompt('Please enter new name for your file:');
+            if(new_file)
+            {
+                document.file_system_management_top.new_file_name.value = new_file;
+                document.file_system_management_bottom.new_file_name.value = new_file;
+                return true;
+            }
+            else
+            {
+                alert('You have provided empty file name!');
+                return false;
+            }
+        }
+        else if((folders[0] != "" && folders.length == 1) && files[0] == "")
+        {
+            var new_folder = prompt('Please enter new name for your folder:');
+            if(new_folder)
+            {
+                document.file_system_management_top.new_folder_name.value = new_folder;
+                document.file_system_management_bottom.new_folder_name.value = new_folder;
+                return true;
+            }
+            else
+            {
+                alert('You have provided empty folder name!');
+                return false;
+            }
+        }
+        else if((folders[0] == "" && folders.length == 1) && (files[0] == "" && files.length == 1))
+        {
+            alert('No file or folder is selected!');
+            return false;
+        }
+        else
+        {
+            alert('You cannot rename multiple files and/or folders!');
+            return false;
+        }
+    }
+    
+    function show_layer(id, action)
+    {
+        // Opera
+        if(navigator.userAgent.indexOf("Opera") != -1 && document.getElementById)
+            type="OP";
+        
+        // Internet Explorer e.g. IE4+
+        if(document.all)
+            type="IE";
+        
+        // Netscape version 4 :
+        if(document.layers)
+            type="NN";
+        
+        // Mozila e.g. Netscape 6 upwards
+        if(!document.all && document.getElementById)
+            type="MO";
+        
+        // Show/hide the layer
+        if(type == "IE")
+            eval("document.all." + id + ".style.visibility='" + action + "'");
+        if(type == "NN")
+            eval("document." + id + ".visibility='" + action + "'");
+        if(type == "MO" || type == "OP")
+            eval("document.getElementById('" + id + "').style.visibility='" + action + "'");
+    }
+    
+    // Hide text field for mail filters "Add E-mail Filter" form
+    function hide_content2(value, id)
+    {
+        if(value == "delete")
+            show_layer(id, "hidden");
+        else
+            show_layer(id, "visible");
+        
+        if(value == "forward")
+        {
+            show_layer("expand_forward_list", "visible");
+        }
+        else
+        {
+            show_layer("expand_forward_list", "hidden");
+            show_layer_ext("forward_list", "hidden", "none");
+        }
+    }
+    
+    // Hide text field for mail filters "Add Spam Filter" form
+    function hide_content(value, id)
+    {
+        if(value == "delete")
+            show_layer(id, "hidden");
+        else
+            show_layer(id, "visible");
+    }
+    
+    function show_layer_ext(id, action1, action2)
+    {
+        // Opera
+        if(navigator.userAgent.indexOf("Opera") != -1 && document.getElementById)
+            type="OP";
+        
+        // Internet Explorer e.g. IE4+
+        if(document.all)
+            type="IE";
+        
+        // Netscape version 4 :
+        if(document.layers)
+            type="NN";
+        
+        // Mozila e.g. Netscape 6 upwards
+        if(!document.all && document.getElementById)
+            type="MO";
+        
+        // Show/hide the layer
+        if(type == "IE")
+        {
+            eval("document.all." + id + ".style.visibility='" + action1 + "'");
+            eval("document.all." + id + ".style.display='" + action2 + "'");
+        }
+        if(type == "NN")
+        {
+            eval("document." + id + ".visibility='" + action1 + "'");
+            eval("document." + id + ".display='" + action2 + "'");
+        }
+        if(type == "MO" || type == "OP")
+        {
+            eval("document.getElementById('" + id + "').style.visibility='" + action1 + "'");
+            eval("document.getElementById('" + id + "').style.display='" + action2 + "'");
+        }
+    }
+    
+    function write_layer_content(id, text)
+    {
+        // Opera
+        if(navigator.userAgent.indexOf("Opera") != -1 && document.getElementById)
+            type="OP";
+        
+        // Internet Explorer e.g. IE4+
+        if(document.all)
+            type="IE";
+        
+        // Netscape version 4 :
+        if(document.layers)
+            type="NN";
+        
+        // Mozila e.g. Netscape 6 upwards
+        if(!document.all && document.getElementById)
+            type="MO";
+        
+        // Show/hide the layer
+        if(type == "IE")
+        {
+            eval("document.all." + id + ".innerHTML=''");
+            eval("document.all." + id + ".innerHTML='" + text + "'");
+        }
+        if(type == "NN")
+        {
+            eval("document." + id + ".innerHTML=''");
+            eval("document." + id + ".innerHTML='" + text + "'");
+        }
+        if(type == "MO" || type == "OP")
+        {
+            eval("document.getElementById('" + id + "').innerHTML=''");
+            eval("document.getElementById('" + id + "').innerHTML='" + text + "'");
+        }
+    }
+    
+    // Display random tips
+    var timerID = null;
+    function get_random_tip()
+    {
+        var message = new Array('<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: Read the FAQ section to find the answers you are searching for.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: SMTP feature is disabled for all free hosting accounts. Mail scripts will not be able to send e-mails.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: To report an issue for your hosting services, please use the Ticket System in your Hosting Control Panel.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: Adding a domain name in the Domain Manager section will not initiate domain registration process.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: To host your domain name in your hosting account you should point its Name Servers to ours.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: Connecting to the FTP server and upload your website, you should have FTP hostname (domain/subdomain).</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: All scripts should have 755 permissions in order to be executable.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: The folders in your hosting account should have 755 permissions.</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: You can change file/folder permissions via your FTP client (most FTP clients support this feature).</b></a>', '<a href="javascript:next_random_tip()" style="color: #000000; text-decoration: none"><b>TIP: The default file/folder permissions are set to 755 when uploading your website via FTP.</b></a>');
+        var message_num = Math.floor(Math.random()*(message.length));
+        write_layer_content("tips", message[message_num]);
+        clearTimeout(timerID);
+        timerID = setTimeout("tips_timeout()", 10000);
+    }
+    
+    function tips_timeout(id)
+    {
+        write_layer_content("tips", "");
+        clearTimeout(timerID);
+        timerID = setTimeout("get_random_tip()", 500);
+    }
+    
+    function next_random_tip()
+    {
+        write_layer_content("tips", "");
+        clearTimeout(timerID);
+        timerID = setTimeout("get_random_tip()", 0);
+    }
+    
+</script>
+<noscript>
+
+    <table width="100%" cellspacing="0" cellpadding="0" class="javascript_error">
+      <tr>
+        <td>Warning: You should have Javascript enabled on your web browser to use the hosting control panel at <a href="http://www.awardspace.com" class="javascript_error">http://www.awardspace.com</a>.</td>
+        <td align="right"><a href="?js=show" class="javascript_error" title="Expand/Collapse">Help <img src="images/expand.jpg" alt="Expand/Collapse"></a>&nbsp;</td>
+      </tr>
+    </table></noscript><table width="100%" height="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+  <tr>
+    <td valign="top">
+      <table width="100%" height="80" cellspacing="0" cellpadding="0" class="cp_logo">
+        <tr>
+          <td width="1000" class="cp_logo1"><a href="http://www.awardspace.com/"><img src="images/spacer.gif" width="619" height="80"></a></td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <table width="100%" height="22" cellspacing="0" cellpadding="0" class="top_nav_menu">
+        <tr>
+          <td width="60"><a href="index.html" class="menu2">Home</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td width="80"><a href="upgrades.html" class="menu2">Upgrades</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td width="130"><a href="website_manager.html" class="menu2">Website Manager</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td width="120"><a href="email_manager.html" class="menu2">E-mail Manager</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td width="140"><a href="website_statistics.html" class="menu2">Website Statistics</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td width="130"><a href="account_manager.html" class="menu2">Account Manager</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td width="120"><a href="support_center.html" class="menu2">Support Center</a></td>
+          <td width="2"><div class="top_nav_menu_pipe"></div></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="15" class="top_nav_menu_bottom"></td>
+        </tr>
+      </table>
+      <table width="100%" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="760" style="PADDING-LEFT: 4px">
+                              </td>
+          <td align="right">
+	    	    <a href="?logout=1" class="logout">Logout: <b>saulwebmaster</b></a>&nbsp;<img src="images/unlock.png" align="absbottom">&nbsp;
+            <p align="right" class="text">CP Theme:
+    		  <select name="theme">
+                <option>Silver</option>
+                <!--<option>Blue</option>
+                <option>Red</option>
+                <option>Green</option>
+                <option>Black</option>-->
+              </select>&nbsp;<input type="submit" name="Submit" value="Set" class="button">&nbsp;
+            </p>
+	              </td>
+        </tr>
+        <tr>
+          <td colspan="2" height="3" bgcolor="#F0F0F0"></td>
+        </tr>
+        <tr>
+          <td colspan="2" height="5"></td>
+        </tr>
+      </table>
+      <table width="100%" class="table_style2">
+  	    <tr>
+          <td width="170" class="text">Welcome, <b>saulwebmaster</b>!</td>
+  		  <td class="tips"><div id="tips"></div><noscript><b>TIP: Connecting to the FTP server and upload your website, you should have FTP hostname (domain/subdomain).</b></noscript></td>
+        </tr>
+      </table>
+      <table width="100%" class="table_style2">
+        <tr>
+          <td width="170" valign="top">
+            <!-- Page Content Start-->
+
+
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><div class="section_title_left2"></div></td>
+                <td width="100%"><div class="section_title"><div class="section_title_text">Website Manager</div></div></td>
+                <td><div class="section_title_right"></div></td>
+              </tr>
+            </table>
+            <table width="100%" border="0" cellspacing="0" cellpadding="2">
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="domain_manager.html" class="menu2">Domain Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="subdomain_manager.html" class="menu2">Subdomain Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="ftp_manager.html" class="menu2">FTP Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="file_manager.html" class="menu2">File Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="password_protection.html" class="menu2">Password Protection</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="mysql_manager.html" class="menu2">MySQL Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="postgres_manager.html" class="menu2">PostgreSQL Manager</a></td>
+              </tr>
+               <tr>
+                <td colspan="3" class="left_nav_menu"><a href="phpMyAdmin/" target="_blank" class="menu2">phpMyAdmin</a></td>
+              </tr>
+               <tr>
+                <td colspan="3" class="left_nav_menu"><a href="phpPgAdmin/" target="_blank" class="menu2">phpPgAdmin</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="frontpage_manager.html" class="menu2">FrontPage Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="crontab.html" class="menu2">Crontab</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="ssh_manager.html" class="menu2">SSH Manager</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="hosting_settings.html" class="menu2">Hosting Settings</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="zinstaller.html" class="menu2">Zacky Tools Installer</a></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="ssl_manager.html" class="menu2">SSL Manager</a> <img src="images/new.gif" style="padding-top: 2px;" align="top"></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="php_settings.html" class="menu2">PHP Settings</a> <img src="images/new.gif" style="padding-top: 2px;" align="top"></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="aspdotnet_manager.html" class="menu2">ASP.NET Manager</a> <img src="images/new.gif" style="padding-top: 2px;" align="top"></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="htaccess_generator.html" class="menu2">.htaccess Generator</a> <img src="images/new.gif" style="padding-top: 2px;" align="top"></td>
+              </tr>
+              <tr>
+                <td colspan="3" class="left_nav_menu"><a href="dns_records.html" class="menu2">DNS Records</a> <img src="images/new.gif" style="padding-top: 2px;" align="top"></td>
+              </tr>
+            </table>
+            <br>
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><div class="section_title_left2"></div></td>
+                <td width="100%"><div class="section_title"><div class="section_title_text">Account Statistics</div></div></td>
+                <td><div class="section_title_right"></div></td>
+              </tr>
+            </table>
+                        <table width="100%" cellspacing="1" cellpadding="2" class="table_style1">
+              <tr>
+                <td colspan="3" align="center">
+              <b>Basic</b>                </td>
+              </tr>
+                            <tr>
+                <td width="70"><b>Services</b></td>
+                <td><b>Total</b></td>
+                <td><b>Used</b></td>
+              </tr>
+              <tr>
+                <td>Disk Space</td>
+                <td>60 GB</td>
+                <td>643.04 MB</td>
+              </tr>
+              <tr>
+                <td>Traffic</td>
+                <td>1000 GB</td>
+                <td>500.99 MB</td>
+              </tr>
+              <tr>
+                <td>Domains</td>
+                <td>5</td>
+                <td>4</td>
+              </tr>
+              <tr>
+                <td>Subdomains</td>
+                <td>40</td>
+                <td>2</td>
+              </tr>
+              <tr>
+                <td>MySQL</td>
+                <td>20</td>
+                <td>9</td>
+              </tr>
+              <tr>
+                <td>PostgreSQL</td>
+                <td>20</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>E-mails</td>
+                <td>1000</td>
+                <td>3</td>
+              </tr>
+              <tr>
+                <td>Aliases</td>
+                <td>2000</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td colspan="3" align="right">
+                  <form name="refresh_hosting_usage" method="post" action="" style="display:inline">
+		    <span onclick="div = document.createElement('div');div.style.position = 'fixed';div.style.top = '35%';div.style.left = '30%';div.style.backgroundColor = '#FFFFFF';div.style.padding = '50';div.style.fontSize = '14';div.style.border = '1px solid #000000';div.style.zIndex = '10';div.innerHTML = 'Refreshing Disk usade statistics in real time, please wait.<br /><b>Note:</b> The traffic statistics cannot be refreshed in real time.<br /><br /><center><img src=\'images/ajax-loader.gif\' /></center>';div2 = document.createElement('div');div2.style.position = 'fixed';div2.style.opacity = '0.4';div2.style.filter = 'alpha(opacity=40)';div2.style.height = '100%';div2.style.width = '100%';div2.style.top = '0';div2.style.left = '0';div2.style.backgroundColor = '#000000';div2.innerHTML = '&nbsp';div2.style.zIndex = '9';document.body.appendChild(div2);document.body.appendChild(div);setTimeout(function(){document.forms.refresh_hosting_usage.submit()}, 5000);return false;">
+                    <input type="submit" name="Submit" value="Refresh Statistics" class="open_folder"><input type="image" src="images/refresh.png" name="Submit" value="Refresh_Statistics" title="Refresh Statistics"></span>&nbsp;
+		    <input type="hidden" name="action" value="refresh_statistics" />
+                  </form>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3"><font style="font-size: 11px">Note: Disk space and traffic statistics are updated hourly!</font></td>
+              </tr>
+            </table>
+            &nbsp;
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><div class="section_title_left2"></div></td>
+                <td width="100%"><div class="section_title"><div class="section_title_text">Account Features</div></div></td>
+                <td><div class="section_title_right"></div></td>
+              </tr>
+            </table>
+            <table width="100%" cellspacing="1" cellpadding="2" class="table_style1">
+              <tr>
+                <td width="70"><b>Services</b></td>
+                <td><b>Status</b></td>
+              </tr>
+              <tr>
+                <td>Banners</td>
+                <td>
+                    OFF                </td>
+              </tr>
+              <tr>
+                <td>File Size Limit</td>
+                <td>
+                    OFF                </td>
+              </tr>
+              <tr>
+                <td>SMTP</td>
+                <td>
+                    ON                </td>
+              </tr>
+              <tr>
+                <td>Account Expiration</td>
+                <td>
+                    2015-06-15                </td>
+              </tr>
+              <tr>
+                <td colspan="2" align="right"><a href="hosting_settings.html" title="Hosting Settings" class="table_style1"><font style="font-size: 11px; font-weight: bold">Hosting Settings</font><img src="images/hosting_settings.png" style="padding-left: 10px"></a>&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+          <td valign="top" class="text">            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><div class="section_title_left"></div></td>
+                <td width="100%"><div class="section_title"><div class="section_title_text">File Manager</div></div></td>
+                <td><div class="section_title"><div class="section_title_text"><a href="?help=show" class="help" title="Show Help">Help!</a>&nbsp;</div></div></td>
+                <td><div class="section_title_right"></div></td>
+              </tr>
+            </table>
+    		 &nbsp;		<script type="text/javascript" language="Javascript" src="ajax.js">
+		</script>
+    		<table width="100%" border="0" cellspacing="0" cellpadding="2" class="text">
+              <tr>
+                <td width="50px"></td>
+                <td valign="top">
+                    
+					<div id="status_div">
+					  
+					</div>
+					<div id="loading_div" align="center" style="display: none; z-index: 1; position: fixed; top: 30%; left: 33%; width: 33%; background: #FFFFFF; border: 1px solid #666666; font-size:10px; padding: 40px;" style="text">
+					  <table>
+					    <tr>
+					      <td>
+            					<img src="images/ajax-loader.gif" />
+					      </td>
+					      <td id="loading_div_info"></td>
+					    </tr>
+					  </table>
+					</div>
+				    
+                  <form name="file_system_navigation_top" method="post" action="file_manager.html" style="display:inline">
+                    Current folder: /home/www/&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="path" value="/">
+                    &nbsp;<input type="image" src="images/uplevel.png" name="Uplevel" value="Uplevel" title="Uplevel">
+                    &nbsp;<input type="image" src="images/toplevel.png" name="Top_Level" value="Top Level" title="Top Level">
+                  </form>
+    
+                  <br />
+                  <br />
+        
+                <b>Warning: </b>Directory protection for your hostnames is <b><font color="#00A000">disabled</font></b> - you can delete them by accident.<br />
+                (You CAN delete hostname directories and upload files outside them)
+            
+            Directory protection:
+            <form method="post" name="immune_dirs_form" action="file_manager.html" style="display:inline">
+              <input type="hidden" name="immune_flag" value="1">
+              <input type="hidden" name="action" value="set_immune_dirs" />
+              <input type="submit" value="Enable" name="submit" class="button" />
+            </form>
+        
+                  <br>
+                  <br>
+                  <form name="file_system_management_top" method="post" action="file_manager.html" style="display:inline">
+                    <input type="hidden" name="path" value="/">
+                    <input type="hidden" name="new_path" value="">
+                    <input type="hidden" name="new_folder_name" value="">
+                    <input type="hidden" name="new_file_name" value="">
+                    <input type="hidden" name="manage_files" value=""><br>
+                    <input type="hidden" name="manage_folders" value="">
+                    <input type="submit" name="Submit" value="Delete" class="button" onClick="return confirm_delete(document.file_system_management_top.manage_files.value, document.file_system_management_top.manage_folders.value)">
+                    <input type="submit" name="Submit" value="Rename" class="button" onClick="return set_new_name(document.file_system_management_top.manage_files.value, document.file_system_management_top.manage_folders.value)">
+                    <input type="submit" name="Submit" value="Move To" class="button" onClick="return set_new_path(document.file_system_management_top.path.value, document.file_system_management_top.manage_files.value, document.file_system_management_top.manage_folders.value)" />
+    
+                    <input type="submit" name="Submit" value="Extract" class="button" onclick="return confirm_extract(document.file_system_management_top.manage_files.value, document.file_system_management_top.manage_folders.value);" />
+	
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Permissions:
+                    <select name="permissions" class="inputbox">
+		      <option value="0755" selected>755</option>
+                      <option value="0644">644</option>
+                      <option value="0777">777</option>
+		      <option value="0700">700</option>
+                    </select>
+		    <input type="checkbox" name="recursive" value="1" class="inputbox" /> Recursive 
+                    <input type="submit" name="Submit" value="Set" class="button" onclick="return confirm_chmod(document.file_system_management_top.manage_files.value, document.file_system_management_top.manage_folders.value);">
+                  </form>
+                  <br>
+                  <br>
+                  <table width="100%" cellspacing="1" cellpadding="2" class="table_style1">
+                    <tr>
+                      <td width="95"><b>Options</b></td>
+                      <td><b>Name</b></td>
+                      <td><b>Size</b></td>
+                      <td><b>Type</b></td>
+                      <td><b>Date Modified</b></td>
+                      <td><b>Permissions <a href="?help=show" class="table_style1" style="text-decoration: none; color: #FF0000; font-weight: bold" title="What are these permissions for?">[?]</a></b></td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_1" method="post" action="file_manager.html" style="display:inline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <input type="hidden" name="cd" value="/."><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value=".">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/.">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="." title="Current Folder" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Jun 23 17:51</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_2" method="post" action="file_manager.html" style="display:inline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                          <input type="hidden" name="cd" value="/.."><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="..">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/..">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value=".." title="Up One Folder" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Jun 23 17:51</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_3" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="3" onClick="manage_folders(document.folder_options_3.checkbox.checked, 'casder.net', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/casder.net"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="casder.net">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;casder.net&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/casder.net">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="casder.net" title="Open Folder &quot;casder.net&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Jul 24 03:14</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_4" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="4" onClick="manage_folders(document.folder_options_4.checkbox.checked, 'compartir-educacionespecial.org', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/compartir-educacionespecial.org"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="compartir-educacionespecial.org">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;compartir-educacionespecial.org&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/compartir-educacionespecial.org">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="compartir-educacionespecial.org" title="Open Folder &quot;compartir-educacionespecial.org&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Dec 5 2013</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_5" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="5" onClick="manage_folders(document.folder_options_5.checkbox.checked, 'demo.compartir-educacionespecial.org', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/demo.compartir-educacionespecial.org"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="demo.compartir-educacionespecial.org">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;demo.compartir-educacionespecial.org&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/demo.compartir-educacionespecial.org">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="demo.compartir-educacionespecial.org" title="Open Folder &quot;demo.compartir-educacionespecial.org&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Feb 18 20:13</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_6" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="6" onClick="manage_folders(document.folder_options_6.checkbox.checked, 'laveladasalon.com', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/laveladasalon.com"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="laveladasalon.com">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;laveladasalon.com&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/laveladasalon.com">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="laveladasalon.com" title="Open Folder &quot;laveladasalon.com&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Mar 31 07:53</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_7" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="7" onClick="manage_folders(document.folder_options_7.checkbox.checked, 'ledcity.bo', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/ledcity.bo"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="ledcity.bo">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;ledcity.bo&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/ledcity.bo">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="ledcity.bo" title="Open Folder &quot;ledcity.bo&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>May 14 2013</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_8" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="8" onClick="manage_folders(document.folder_options_8.checkbox.checked, 'material', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/material"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="material">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;material&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/material">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="material" title="Open Folder &quot;material&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Feb 15 2012</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_9" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="9" onClick="manage_folders(document.folder_options_9.checkbox.checked, 'pdfs', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/pdfs"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="pdfs">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;pdfs&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/pdfs">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="pdfs" title="Open Folder &quot;pdfs&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Mar 18 2011</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <form name="folder_options_10" method="post" action="file_manager.html" style="display:inline">
+                          <input type="checkbox" name="checkbox" value="10" onClick="manage_folders(document.folder_options_10.checkbox.checked, 'sergioycatalina.awardspace.info', document.file_system_management_top.manage_folders.value)">
+                          <input type="hidden" name="cd" value="/sergioycatalina.awardspace.info"><input type="hidden" name="path" value="/"><input type="hidden" name="folder_name" value="sergioycatalina.awardspace.info">
+                          &nbsp;<input type="image" src="images/folder_open.png" name="Open_Folder" value="Open Folder" title="Open Folder">
+                          &nbsp;<input type="image" src="images/folder_delete.png" name="Delete_Folder" value="Delete Folder" title="Delete Folder" onClick="return confirm('Are you sure you want to delete your folder &quot;sergioycatalina.awardspace.info&quot;')">
+                        </form>
+                      </td>
+                      <td>
+                        <form name="open_folder" method="post" action="file_manager.html" style="display:inline">
+                          <input type="hidden" name="cd" value="/sergioycatalina.awardspace.info">
+                          <input type="hidden" name="path" value="/">
+                          <input type="submit" name="Open_Folder_x" value="sergioycatalina.awardspace.info" title="Open Folder &quot;sergioycatalina.awardspace.info&quot;" class="open_folder">
+                        </form>
+                      </td>
+                      <td>-</td>
+                      <td>Folder</td>
+                      <td>Nov 21 2013</td>
+                      <td>drwxr-xr-x</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <script language="Javascript" type="text/javascript">
+                            function select_all(status)
+                            {
+                                if(status == true)
+                                {
+                                manage_folders(document.folder_options_3.checkbox.checked = true, 'casder.net', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_4.checkbox.checked = true, 'compartir-educacionespecial.org', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_5.checkbox.checked = true, 'demo.compartir-educacionespecial.org', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_6.checkbox.checked = true, 'laveladasalon.com', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_7.checkbox.checked = true, 'ledcity.bo', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_8.checkbox.checked = true, 'material', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_9.checkbox.checked = true, 'pdfs', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_10.checkbox.checked = true, 'sergioycatalina.awardspace.info', document.file_system_management_top.manage_folders.value);
+                                }
+                                else
+                                {
+                                manage_folders(document.folder_options_3.checkbox.checked = false, 'casder.net', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_4.checkbox.checked = false, 'compartir-educacionespecial.org', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_5.checkbox.checked = false, 'demo.compartir-educacionespecial.org', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_6.checkbox.checked = false, 'laveladasalon.com', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_7.checkbox.checked = false, 'ledcity.bo', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_8.checkbox.checked = false, 'material', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_9.checkbox.checked = false, 'pdfs', document.file_system_management_top.manage_folders.value);
+                                manage_folders(document.folder_options_10.checkbox.checked = false, 'sergioycatalina.awardspace.info', document.file_system_management_top.manage_folders.value);
+                                }
+                            }
+                        </script><form name="check_all" style="display:inline"><input type="checkbox" name="check_all" onClick="select_all(document.check_all.check_all.checked)">&nbsp;Select All</form></td>
+                      <td>Total: 10 folders</td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </table>
+        		  <br>
+                  <form name="file_system_navigation_bottom" method="post" action="file_manager.html" style="display:inline">
+                    Current folder: /home/www/&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="path" value="/">
+                    &nbsp;<input type="image" src="images/uplevel.png" name="Uplevel" value="Uplevel" title="Uplevel">
+                    &nbsp;<input type="image" src="images/toplevel.png" name="Top_Level" value="Top Level" title="Top Level">
+                  </form>
+    
+                  <br />
+                  <br />
+        
+                <b>Warning: </b>Directory protection for your hostnames is <b><font color="#00A000">disabled</font></b> - you can delete them by accident.<br />
+                (You CAN delete hostname directories and upload files outside them)
+            
+            Directory protection:
+            <form method="post" name="immune_dirs_form" action="file_manager.html" style="display:inline">
+              <input type="hidden" name="immune_flag" value="1">
+              <input type="hidden" name="action" value="set_immune_dirs" />
+              <input type="submit" value="Enable" name="submit" class="button" />
+            </form>
+        
+                  <br>
+                  <br>
+                  <form name="file_system_management_bottom" method="post" action="file_manager.html" style="display:inline">
+                    <input type="hidden" name="path" value="/">
+                    <input type="hidden" name="new_path" value="">
+                    <input type="hidden" name="new_folder_name" value="">
+                    <input type="hidden" name="new_file_name" value="">
+                    <input type="hidden" name="manage_files" value=""><br>
+                    <input type="hidden" name="manage_folders" value="">
+                    <input type="submit" name="Submit" value="Delete" class="button" onClick="return confirm_delete(document.file_system_management_bottom.manage_files.value, document.file_system_management_bottom.manage_folders.value)">
+                    <input type="submit" name="Submit" value="Rename" class="button" onClick="return set_new_name(document.file_system_management_bottom.manage_files.value, document.file_system_management_bottom.manage_folders.value)">
+                    <input type="submit" name="Submit" value="Move To" class="button" onClick="return set_new_path(document.file_system_management_bottom.path.value, document.file_system_management_bottom.manage_files.value, document.file_system_management_bottom.manage_folders.value)" />
+    
+                    <input type="submit" name="Submit" value="Extract" class="button" onclick="return confirm_extract(document.file_system_management_bottom.manage_files.value, document.file_system_management_bottom.manage_folders.value);" />
+	
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    Permissions:
+                    <select name="permissions" class="inputbox">
+		      <option value="0755" selected>755</option>
+                      <option value="0644">644</option>
+                      <option value="0777">777</option>
+		      <option value="0700">700</option>
+                    </select>
+		    <input type="checkbox" name="recursive" value="1" class="inputbox" /> Recursive 
+                    <input type="submit" name="Submit" value="Set" class="button" onclick="return confirm_chmod(document.file_system_management_bottom.manage_files.value, document.file_system_management_bottom.manage_folders.value);">
+                  </form>
+                                    
+                </td>
+              </tr>
+            </table>
+            <br>
+            <br>
+            <br>
+            <a name="upload">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><div class="section_title_left"></div></td>
+                <td width="100%"><div class="section_title"><div class="section_title_text">File Upload</div></div></td>
+                <td><div class="section_title"><div class="section_title_text">&nbsp;&nbsp;</div></div></td>
+                <td><div class="section_title_right"></div></td>
+              </tr>
+            </table>
+    		<table width="100%" border="0" cellspacing="0" cellpadding="2" class="text">
+              <tr>
+                <td width="50px"></td>
+                <td><br>
+                  <form name="file_system_navigation_upload" method="post" action="file_manager.html" style="display:inline">
+                    Current folder: /home/www/&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="path" value="/">
+                    &nbsp;<input type="image" src="images/uplevel.png" name="Uplevel" value="Uplevel" title="Uplevel">
+                    &nbsp;<input type="image" src="images/toplevel.png" name="Top_Level" value="Top Level" title="Top Level">
+                  </form>
+    
+                  <br />
+                  <br />
+        
+                <b>Warning: </b>Directory protection for your hostnames is <b><font color="#00A000">disabled</font></b> - you can delete them by accident.<br />
+                (You CAN delete hostname directories and upload files outside them)
+            
+            Directory protection:
+            <form method="post" name="immune_dirs_form" action="file_manager.html" style="display:inline">
+              <input type="hidden" name="immune_flag" value="1">
+              <input type="hidden" name="action" value="set_immune_dirs" />
+              <input type="submit" value="Enable" name="submit" class="button" />
+            </form>
+        
+                  <br>
+                  <br>
+                  <form enctype="multipart/form-data" name="file_upload" method="post" action="file_manager.html#upload">
+                    <input type="hidden" name="path" value="/">
+                    <input type="hidden" name="upload" value="1">
+                    <input type="file" name="remote_file[0]" class="inputbox" size="40"><br>
+                    <input type="file" name="remote_file[1]" class="inputbox" size="40"><br>
+                    <input type="file" name="remote_file[2]" class="inputbox" size="40"><!-- TODO &nbsp;&nbsp;<a href="#" class="table_style1">More Files...</a>--><br><br>
+                    <input type="submit" name="Submit" value="Upload File(s)" class="button"> &nbsp;&nbsp; (<b>Note:</b> To upload files bigger than 20MB you should use a FTP client.)
+                  </form>
+                </td>
+              </tr>
+            </table>
+            <br>
+            <br>
+            <br>
+            <a name="new">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr>
+                <td><div class="section_title_left"></div></td>
+                <td width="100%"><div class="section_title"><div class="section_title_text">Create File / Folder</div></div></td>
+                <td><div class="section_title_right"></div></td>
+              </tr>
+            </table>
+            <table width="100%" border="0" cellspacing="0" cellpadding="2" class="text">
+              <tr>
+                <td width="50px"></td>
+                <td><br>
+                  <form name="file_system_navigation_upload" method="post" action="file_manager.html" style="display:inline">
+                    Current folder: /home/www/&nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="path" value="/">
+                    &nbsp;<input type="image" src="images/uplevel.png" name="Uplevel" value="Uplevel" title="Uplevel">
+                    &nbsp;<input type="image" src="images/toplevel.png" name="Top_Level" value="Top Level" title="Top Level">
+                  </form>
+    
+                  <br />
+                  <br />
+        
+                <b>Warning: </b>Directory protection for your hostnames is <b><font color="#00A000">disabled</font></b> - you can delete them by accident.<br />
+                (You CAN delete hostname directories and upload files outside them)
+            
+            Directory protection:
+            <form method="post" name="immune_dirs_form" action="file_manager.html" style="display:inline">
+              <input type="hidden" name="immune_flag" value="1">
+              <input type="hidden" name="action" value="set_immune_dirs" />
+              <input type="submit" value="Enable" name="submit" class="button" />
+            </form>
+        
+                  <br>
+                  <br>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="1" class="text">
+                      <tr>
+                        <td width="80">File Name:</td>
+                        <td>
+                          <form name="create_file" method="post" action="file_manager.html#new" style="display:inline">
+                            <input type="hidden" name="path" value="/">
+                            <input type="text" name="new_file" class="inputbox" style="width:200px">&nbsp;<input type="submit" name="Submit" value="Create File" class="button">
+                          </form>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Folder Name:</td>
+                        <td>
+                          <form name="create_folder" method="post" action="file_manager.html#new" style="display:inline">
+                            <input type="hidden" name="path" value="/">
+                            <input type="text" name="new_folder" class="inputbox" style="width:200px">&nbsp;<input type="submit" name="Submit" value="Create Folder" class="button">
+                          </form>
+                        </td>
+                      </tr>
+                    </table>
+                </td>
+              </tr>
+            </table>
+            <br>
+            <br>
+
+
+          <!-- Page Content End -->
+        </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td height="18" valign="bottom"><center class="copyright">&#169; Copyright 2003 - 2014 <a href="http://www.awardspace.com" target="_blank" class="copyright">AWARDSPACE.COM</a> - <a href="http://www.attractsoft.com/" target="_blank" class="copyright">AttractSoft</a> &amp; <a href="http://www.zettahost.com/" target="_blank" class="copyright">Zetta Hosting Solutions</a> - All rights reserved.</center></td>
+  </tr>
+</table>
+
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ? "https://tracking.ta.cm/" : "http://tracking.ta.cm/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 26);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://tracking.ta.cm/piwik.php?idsite=26" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+
+
+</body>
+</html>

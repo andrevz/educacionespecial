@@ -1,0 +1,24 @@
+# CodeIgniter 2 specific ignores
+/application/cache/*
+!/application/cache/index.html # Keep index.html for security
+/application/logs/*
+!/application/logs/index.html # Keep index.html for security
+/application/config/development/* # Or other environment-specific config files
+/system/cache/*
+!/system/cache/index.html # Keep index.html for security
+/user_guide/ # If present and not needed in repo
+
+# General ignores
+*.log
+*.sql
+*.zip
+*.tar
+*.tar.gz
+*.rar
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+nbproject/
+build/
+vendor/ # If using Composer for third-party libraries
