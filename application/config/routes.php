@@ -42,8 +42,8 @@ $route['default_controller'] = "categoria/inicio";
 $route['404_override'] = '';
 
 
-    // para la URI normal cuando llamamos a un controlador
-    $route['^(en|es)/(.+)$'] = "$2";
+// para la URI normal cuando llamamos a un controlador
+$route['^(en|es)/(.+)$'] = "$2";
 
 /* End of file routes.php */
 /* Location: ./application/config/routes.php */
