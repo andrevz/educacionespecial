@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
    <title>Admin -Iniciar Sesion</title>
       <link href="<?=base_url()?>/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 <body>
    
 <div class="container">
-     <div class="row"> <div class="col-lg-6 col-sm-6"> <h1>Admin - Fundacion Compartir</h1> </div> </div>
+     <div class="row"> <div class="col-lg-6 col-sm-6"> <h1>Admin - Fundaci&oacute;n Compartir</h1> </div> </div>
 </div>
 <hr/>
    <?php echo validation_errors(); ?>
@@ -26,7 +26,7 @@
           <?php 
          // $attributes = array("class" => "form-horizontal", "id" => "loginform", "name" => "loginform");?>
           <fieldset>
-               <legend>Iniciar Sesión</legend>
+               <legend>Iniciar Sesi&oacute;n</legend>
                <div class="form-group">
                <div class="row colbox">
                <div class="col-lg-4 col-sm-4">
@@ -45,7 +45,7 @@
                <label for="txt_password" class="control-label">Password</label>
                </div>
                <div class="col-lg-8 col-sm-8">
-                    <input class="form-control" id="password" name="password" placeholder="Contraseña" type="password" value="<?php echo set_value('password'); ?>" />
+                    <input class="form-control" id="password" name="password" placeholder="ContraseÃ±a" type="password" value="<?php echo set_value('password'); ?>" />
                     <span class="text-danger"><?php echo form_error('password'); ?></span>
                </div>
                </div>
