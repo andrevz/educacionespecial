@@ -45,7 +45,7 @@
 		});
 	</script>
 
-<title>COMPARTIR - Centro Preescolar de Educacion Especial</title>
+<title>COMPARTIR - Centro de Educacion Especial</title>
 <link href="<?php echo base_url(); ?>css/main.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript">
 function MM_swapImgRestore() { //v3.0

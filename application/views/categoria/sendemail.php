@@ -51,9 +51,7 @@ Referral : $httpref \n
 
 $from = "From: $visitormail\r\n";
 
-
-//mail("compartir@supernet.com.bo", $subject, $message, $from);
-mail("compartir@supernet.com.bo", "Nuevo Mensaje - Centro Preescolar de Educacion Especial", $message, $from);
+mail("compartir@supernet.com.bo", "Nuevo Mensaje - Centro de Educacion Especial", $message, $from);
 
 ?>
 

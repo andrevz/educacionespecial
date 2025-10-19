@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>COMPARTIR - Centro Preescolar de Educacion Escpecial - Información y Contacto</title>
+<title>COMPARTIR - Centro de Educacion Escpecial - Información y Contacto</title>
 <link href="css/main.css" rel="stylesheet" type="text/css" />
 <script type="text/javascript">
 function MM_swapImgRestore() { //v3.0

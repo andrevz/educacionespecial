@@ -48,7 +48,7 @@ function MM_swapImage() { //v3.0
           <h1>Cooperación: AMIGAS DE COMPARTIR</h1>
           <h3>Hamburgo</h3>
           <p><img src="images/amigasalemania1.jpg" alt="" width="156" height="206" /></p>
-          <p> El mes de junio de 2010, un grupo de amigas bolivianas, integrado por   Lenna Reyla, Fabiola Rivero, Karin Schlitt, Denisse Melgar y Evelyn   Melgar, participaron en el &quot;Día de la Lengua Española&quot; realizado en el   Instituto Cervantes de la ciudad de Hamburgo – Alemania,  presentando un   stand de Bolivia. En este se ofrecieron diversas comidas típicas   bolivianas y artesanías nacionales. Además, se presentó al Centro   Preescolar de Educación Especial COMPARTIR, en un afán de recaudar   fondos para el mismo.          </p>
+          <p> El mes de junio de 2010, un grupo de amigas bolivianas, integrado por   Lenna Reyla, Fabiola Rivero, Karin Schlitt, Denisse Melgar y Evelyn   Melgar, participaron en el &quot;Día de la Lengua Española&quot; realizado en el   Instituto Cervantes de la ciudad de Hamburgo – Alemania,  presentando un   stand de Bolivia. En este se ofrecieron diversas comidas típicas   bolivianas y artesanías nacionales. Además, se presentó al Centro de Educación Especial COMPARTIR, en un afán de recaudar   fondos para el mismo.          </p>
           <p>ver mas información en:<br />
           </p>
           <div class="box640body" id="colorlink"><a href="http://bolivianosglobales.com/ep/2010/06/empanadas-bolivianas-se-lucieron-en-el-insituto-cervantes-de-hamburgo" target="_new">www.bolivianosglobales.com</a></div>
