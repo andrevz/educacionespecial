@@ -1,9 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head><meta charset="utf-8">
-    <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/960.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/text.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="<?=base_url()?>css/reset.css" media="screen" />
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 	<style type="text/css">
 		label{

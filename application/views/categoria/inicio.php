@@ -27,19 +27,21 @@ if($inicio): ?>
 <div class="sidebar">
     <div class="box320" color="blue">
        <div class="box320head"><img src="<?php echo base_url().lang('idioma.grafico_avisos'); ?>" width="300" height="48" alt="<?php echo lang('idioma.new_titulo') ; ?>" /></div>    
-		   <div class="box320body"><?php		include 'avisos_importantes.php' ;	?> </div>    
- 		   <div class="box320foot"> </div>    
+		   <div class="box320body"><?php		include 'avisos_importantes.php' ;	?> 
+        </div>
+ 		<div class="box320foot"> </div>
+ 		
+ 		<br>
+        <div class="box200" style="text-align:center;"><p class="credits"><?php echo lang('idioma.new_contador') ; ?></p>
+	        <script type="text/javascript" src="http://contadores.miarroba.es/ver.php?id=647756"></script>
+
+            <a title="contador de visitas" ><img src="https://counter6.optistats.ovh/private/contadorvisitasgratis.php?c=qhqsw4bqf1egrk1264zuuncwuh5zdnzg" border="0" title="contador de visitas" alt="contador de visitas"></a>
+
+        </div>
     </div>
+    
 </div>
 	
-
-
-<div class="box320"> <p class="credits"><?php echo lang('idioma.new_contador') ; ?></p>
-	    <script type="text/javascript" src="http://contadores.miarroba.es/ver.php?id=647756"></script>
-</div>
-
-
-</div></div>
 <?php include 'footer.php';?>
 </div>
 </body>
