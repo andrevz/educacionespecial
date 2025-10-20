@@ -10,7 +10,6 @@
 
 # General ignores
 *.log
-*.sql
 *.zip
 *.tar
 *.tar.gz
